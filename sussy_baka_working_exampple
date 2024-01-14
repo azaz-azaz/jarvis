@@ -1,0 +1,41 @@
+C:\my_works\pythonProjects\Jarvis\.venv\Scripts\python.exe C:\my_works\pythonProjects\game-dev-with-git\developments\gpt\curl_exp\sussy_baka.py
+###получил респонс1
+{'choices': [{'finish_reason': 'tool_calls',
+              'index': 0,
+              'logprobs': None,
+              'message': {'content': None,
+                          'role': 'assistant',
+                          'tool_calls': [{'function': {'arguments': '{}',
+                                                       'name': 'get_time'},
+                                          'id': 'call_qThrvU54mc1732Vy6FRZLKmj',
+                                          'type': 'function'}]}}],
+ 'created': 1705259965,
+ 'id': 'chatcmpl-8h0IvBu3IAtTZm8Kd0cTipXX0GvkA',
+ 'model': 'gpt-3.5-turbo-0613',
+ 'object': 'chat.completion',
+ 'system_fingerprint': None,
+ 'usage': {'completion_tokens': 7, 'prompt_tokens': 61, 'total_tokens': 68}}
+message history:
+[{'content': 'скока времени', 'role': 'user'},
+ {'content': None,
+  'role': 'assistant',
+  'tool_calls': [{'function': {'arguments': '{}', 'name': 'get_time'},
+                  'id': 'call_qThrvU54mc1732Vy6FRZLKmj',
+                  'type': 'function'}]},
+ {'content': '22:18:42.399927',
+  'name': 'get_time',
+  'role': 'tool',
+  'tool_call_id': 'call_qThrvU54mc1732Vy6FRZLKmj'}]
+{'choices': [{'finish_reason': 'stop',
+              'index': 0,
+              'logprobs': None,
+              'message': {'content': 'Время сейчас 22:18.',
+                          'role': 'assistant'}}],
+ 'created': 1705259967,
+ 'id': 'chatcmpl-8h0Ix8NwTT6n5QlsbXcQ49xRW7EuR',
+ 'model': 'gpt-3.5-turbo-0613',
+ 'object': 'chat.completion',
+ 'system_fingerprint': None,
+ 'usage': {'completion_tokens': 12, 'prompt_tokens': 34, 'total_tokens': 46}}
+
+Process finished with exit code 0

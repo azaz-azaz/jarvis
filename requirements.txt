@@ -1,0 +1,9 @@
+googlemaps>=4.10.0
+requests>=2.31.0
+gmaps>=0.9.0
+openai>=1.7.2
+httpx>=0.26.0
+prettytable>=3.9.0
+PyAutoGUI>=0.9.54
+folium>=0.15.1
+keyboard>=0.13.5
