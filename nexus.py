@@ -4,6 +4,8 @@ from pprint import pprint
 from typing import Callable, Literal
 import folium
 
+import Sets
+
 
 class Prop:
     def __init__(self, name: str, type_: Literal["number", "string"], doc: str, required: bool):
@@ -60,7 +62,7 @@ def get_current_datetime(kwargs) -> str:
 
 def open_location(kwargs) -> None:
     fig = folium.Map((kwargs['x'], kwargs['y']))
-    filename = f'C:/jarvis_works/folium/map{kwargs['x']}--{kwargs['y']}.html'
+    filename = f'{Sets.path}\\folium\\map{kwargs['x']}--{kwargs['y']}.html'
     fig.save(filename)
     webbrowser.open(filename)
 

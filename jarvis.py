@@ -1,7 +1,11 @@
 import ast
 import json
+import os
 import requests
+import Sets
 import nexus
+from datetime import datetime
+from random import choice
 from dotdict import dotdict, superlist
 
 proxies = {"https": "65.109.152.88	8888".replace('	', ':')}
@@ -12,6 +16,19 @@ headers = {
 }
 tools = nexus.tools
 available_functions = nexus.available_tools
+generate_filename = lambda: (str(datetime.now()).replace(' ', '_').replace(':', '-') +
+                             ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(4)]))
+
+languages = {
+    "cpp": "cpp",
+    "c++": "cpp",
+    "c": "c",
+    "python": "py",
+    "css": "css",
+    "html": "html",
+    "javascript": "js",
+    "js": "js",
+}
 
 
 class Bot:
@@ -26,6 +43,7 @@ class Bot:
         self.sys_message: str = sys_message
         self.messages: list[dict[str, str]] = history if history is not None else self.get_empty_history()
         self.model = model if model else "gpt-3.5-turbo"
+        print("JARVIS SYSTEM ACTIVATED")
     
     def get_empty_history(self):
         return list() if self.sys_message is None else [{"role": "system", "content": self.sys_message}]
@@ -161,7 +179,27 @@ class Bot:
             frequency_penalty: float = 0
     ) -> str:
         raw_text = self.get_tool_using_response(
-            prompt.prompt, temperature=temperature, presence_penalty=presence_penalty, frequency_penalty=frequency_penalty
+            prompt, temperature=temperature, presence_penalty=presence_penalty, frequency_penalty=frequency_penalty
         )
-        return raw_text
+        print("received response, rawtext:\n",raw_text)
+        splited = raw_text.split('```')
+        comments = []
+        code_fragments = []
+        for i in range(len(splited)):
+            if i % 2:
+                code_fragments.append(splited[i])
+            else:
+                comments.append(splited[i])
+        res = '\nCODE IN IDE\n'.join(comments)
+        for code_fragment in code_fragments:
+            splited = code_fragment.splitlines()
+            name = generate_filename()
+            suffix = languages.get(splited[0])
+            
+            filename = Sets.path + '\\code\\' + name + '.' + ('txt' if suffix is None else suffix)
+            with open(filename, mode='w', encoding='utf-8') as f:
+                f.write(code_fragment.split('\n', maxsplit=1)[1])
+                print("файл сохранен", filename)
+            os.startfile(filename)
+        return res
 

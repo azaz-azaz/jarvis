@@ -7,3 +7,4 @@ prettytable>=3.9.0
 PyAutoGUI>=0.9.54
 folium>=0.15.1
 keyboard>=0.13.5
+Pygments>=2.17.2
