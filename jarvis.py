@@ -4,6 +4,7 @@ import os
 import requests
 import Sets
 import nexus
+import keys
 from datetime import datetime
 from random import choice
 from dotdict import dotdict, superlist
@@ -12,7 +13,7 @@ proxies = {"https": "65.109.152.88	8888".replace('	', ':')}
 url = 'https://api.openai.com/v1/chat/completions'
 headers = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer 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"
+    "Authorization": f"Bearer {keys.openai_token}"
 }
 tools = nexus.tools
 available_functions = nexus.available_tools
