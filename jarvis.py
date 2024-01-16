@@ -5,11 +5,41 @@ import requests
 import Sets
 import nexus
 import keys
+from pprint import pprint
 from datetime import datetime
 from random import choice
 from dotdict import dotdict, superlist
 
+
+def check_valid(ip_port: str):
+    try:
+        txt = requests.get(
+            "https://api.openai.com/",
+            # proxies={"https": "65.109.152.88	8888".replace('	', ':')},
+            proxies={"https": ip_port.replace('	', ':')},
+            timeout=4
+        ).text
+        
+        return "(){var b=a.getElement" not in txt
+    except Exception:
+        return False
+
+
+def convert_to_python_syntax(raw_text: str) -> str:
+    for pack in (
+        (' true', ' True'),
+        (' false', ' False'),
+        (' null', ' None'),
+        ('|\n', '\n'),
+    ):
+        raw_text = raw_text.replace(*pack)
+    return raw_text
+    
+
 proxies = {"https": "65.109.152.88	8888".replace('	', ':')}
+while not check_valid(proxies["https"]):
+    print("p", end='')
+print()
 url = 'https://api.openai.com/v1/chat/completions'
 headers = {
     "Content-Type": "application/json",
@@ -40,11 +70,13 @@ class Bot:
             model: str = None,
             *,
             history: list[dict[str, str]] = None,
+            silent_startup: bool = False
     ):
         self.sys_message: str = sys_message
         self.messages: list[dict[str, str]] = history if history is not None else self.get_empty_history()
         self.model = model if model else "gpt-3.5-turbo"
-        print("JARVIS SYSTEM ACTIVATED")
+        if not silent_startup:
+            print("JARVIS SYSTEM ACTIVATED")
     
     def get_empty_history(self):
         return list() if self.sys_message is None else [{"role": "system", "content": self.sys_message}]
@@ -56,16 +88,23 @@ class Bot:
         self.messages.append(message)
     
     @staticmethod
-    def do_request(data: dict) -> dotdict:
-        return dotdict(
-            requests.request(
-                method="POST",
-                headers=headers,
-                url=url,
-                data=json.dumps(data),
-                proxies=proxies
-            ).json()
+    def _do_request(data: dict) -> dotdict:
+        print("sending...",)
+        pprint(data)
+        print("received", end=' ')
+        response = requests.request(
+            method="POST",
+            headers=headers,
+            url=url,
+            data=json.dumps(data),
+            proxies=proxies
         )
+        pprint(response.json())
+        try:
+            assert response.status_code == 200
+        except AssertionError:
+            raise AssertionError("oai code ==", response.status_code)
+        return dotdict(response.json())
     
     def get_response(
             self,
@@ -76,12 +115,12 @@ class Bot:
             presence_penalty: float = 0,
             frequency_penalty: float = 0,
             tool_choice: str = None,
-            tools: dict = None,
+            tools_: dict = None,
     
     ) -> dotdict:
         self.add_user_message({"role": "user", "content": prompt})
-        if tools is None and tool_choice is None:
-            return self.do_request(
+        if tools_ is None and tool_choice is None:
+            return self._do_request(
                 dict(
                     model=self.model,
                     messages=self.messages,
@@ -90,14 +129,14 @@ class Bot:
                     frequency_penalty=frequency_penalty,
                 )
             )
-        return self.do_request(
+        return self._do_request(
             dict(
                 model=self.model,
                 messages=self.messages,
                 temperature=temperature,
                 presence_penalty=presence_penalty,
                 frequency_penalty=frequency_penalty,
-                tools=tools,
+                tools=tools_,
                 tool_choice=tool_choice,
             )
         )
@@ -131,7 +170,7 @@ class Bot:
         first_response = self.get_response(
             prompt,
             tool_choice="auto",
-            tools=tools,
+            tools_=tools,
             temperature=temperature,
             presence_penalty=presence_penalty,
             frequency_penalty=frequency_penalty,
@@ -151,7 +190,23 @@ class Bot:
             # calls handling
             f_name = tool_call.function.name
             f_to_call = available_functions[f_name]
-            f_args = ast.literal_eval(tool_call.function.arguments)
+            # print("received function call, name =", f_name)
+            # print("raw args:", tool_call.function.arguments)
+            to_eval: str = convert_to_python_syntax(
+                tool_call.function.arguments
+            )
+            try:
+                f_args = ast.literal_eval(
+                    to_eval
+                )
+            except Exception:
+                print("Error with decoding of", to_eval)
+                try:
+                    f_args = ast.literal_eval('{' + to_eval + '}')
+                except ValueError:
+                    raise ValueError("Error with decoding of " + to_eval)
+                except SyntaxError:
+                    raise SyntaxError("Error with decoding of " + to_eval)
             f_response = f_to_call(kwargs=f_args)
             
             self.messages.append(
@@ -162,7 +217,7 @@ class Bot:
                     "content": f_response,
                 }
             )
-        second_response = self.do_request(
+        second_response = self._do_request(
             {
                 "model": self.model,
                 "messages": self.messages,
@@ -182,7 +237,7 @@ class Bot:
         raw_text = self.get_tool_using_response(
             prompt, temperature=temperature, presence_penalty=presence_penalty, frequency_penalty=frequency_penalty
         )
-        print("received response, rawtext:\n",raw_text)
+        # print("received response, rawtext:\n",raw_text)
         splited = raw_text.split('```')
         comments = []
         code_fragments = []
@@ -191,7 +246,7 @@ class Bot:
                 code_fragments.append(splited[i])
             else:
                 comments.append(splited[i])
-        res = '\nCODE IN IDE\n'.join(comments)
+        res = '\n\n...code...\n\n'.join(comments)
         for code_fragment in code_fragments:
             splited = code_fragment.splitlines()
             name = generate_filename()
@@ -203,4 +258,3 @@ class Bot:
                 print("файл сохранен", filename)
             os.startfile(filename)
         return res
-

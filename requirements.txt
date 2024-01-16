@@ -2,3 +2,5 @@ requests>=2.31.0
 PyAutoGUI>=0.9.54
 folium>=0.15.1
 keyboard>=0.13.5
+chardet>=5.2.0
+colorama>=0.4.6
