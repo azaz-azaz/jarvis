@@ -12,6 +12,8 @@ from dotdict import dotdict
 
 colorama.init()
 
+RESTART_PATH = None
+
 print(end=colorama.Fore.BLUE)
 
 allowed_list_apps = dotdict(
@@ -164,10 +166,20 @@ def python_interpreter(kwargs) -> str:
     return result
 
 
+def self_tools(kwargs) -> str:
+    lambda restart: subprocess.Popen(RESTART_PATH), quit(0)
+    lambda stop: print("JARVIS SYSTEM DEACTIVATED"), quit(0)
+    tool_name = kwargs.get('tool_name')
+    if tool_name is None:
+        raise ValueError(f"{self_tools.__name__}: tool_name is None or not given")
+    eval(tool_name + '()')
+    return f"successfully executed: {kwargs['tool_name']}"
+
+
 GetCurrentDatetime = UsableFunction(
     get_current_datetime,
     """Returns current date and time""",
-    []
+    [],
 )
 OpenLocation = UsableFunction(
     open_location,
@@ -197,7 +209,7 @@ OpenLocation = UsableFunction(
             'File name in English to save',
             True,  # need to be False, but if it is True, filename generator is not ready yet
         )
-    ]
+    ],
 )
 CmdPrompt = UsableFunction(
     cmd,
@@ -212,7 +224,7 @@ You start directory is {Sets.path}""",
             """Std input""",
             True,
         )
-    ]
+    ],
 )
 OpenApp = UsableFunction(
     open_app,
@@ -224,7 +236,7 @@ OpenApp = UsableFunction(
             f"""Name of the game. Allowed values: {pretty_allowed_list}""",
             True,
         )
-    ]
+    ],
 )
 PythonExec = UsableFunction(
     python_interpreter,
@@ -236,7 +248,19 @@ PythonExec = UsableFunction(
             """Code to execute, python syntax""",
             True
         ),
-    ]
+    ],
+)
+SelfTools = UsableFunction(
+    self_tools,
+    """Self tools. allowed values: restart, stop""",
+    [
+        Prop(
+            'tool',
+            'string',
+            """Tool that you want to use""",
+            True,
+        )
+    ],
 )
 
 all_functions = [
@@ -245,6 +269,7 @@ all_functions = [
     CmdPrompt,
     OpenApp,
     PythonExec,
+    SelfTools,
 ]
 
 tools = [
