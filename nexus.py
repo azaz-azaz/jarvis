@@ -4,6 +4,8 @@ import sys
 import webbrowser
 import folium
 import pyautogui
+from keyboard import wait
+
 import Sets
 import colorama
 from datetime import datetime
@@ -13,6 +15,7 @@ from dotdict import dotdict
 colorama.init()
 
 RESTART_PATH = None
+CURRENT_BOT = None
 
 print(end=colorama.Fore.BLUE)
 
@@ -166,14 +169,16 @@ def python_interpreter(kwargs) -> str:
     return result
 
 
+# noinspection PyUnresolvedReferences
 def self_tools(kwargs) -> str:
-    lambda restart: subprocess.Popen(RESTART_PATH), quit(0)
-    lambda stop: print("JARVIS SYSTEM DEACTIVATED"), quit(0)
+    lambda restart: print("RESTARTING"), subprocess.Popen(RESTART_PATH), wait()
+    lambda stop: print("JARVIS SYSTEM DEACTIVATED"), wait()
+    lambda clear_memory: print("MEMORY CLEARED"), CURRENT_BOT.set_empty_history()
     tool_name = kwargs.get('tool_name')
     if tool_name is None:
         raise ValueError(f"{self_tools.__name__}: tool_name is None or not given")
     eval(tool_name + '()')
-    return f"successfully executed: {kwargs['tool_name']}"
+    return f"Successfully executed: {kwargs['tool_name']}"
 
 
 GetCurrentDatetime = UsableFunction(
@@ -252,12 +257,12 @@ PythonExec = UsableFunction(
 )
 SelfTools = UsableFunction(
     self_tools,
-    """Self tools. allowed values: restart, stop""",
+    """Your self-control tools.""",
     [
         Prop(
             'tool',
             'string',
-            """Tool that you want to use""",
+            """Tool that you want to use, allowed values: restart, stop, clear_memory""",
             True,
         )
     ],

@@ -12,7 +12,6 @@ sys_message = f"""1) Ты Джарвис.
 5) Твоя папка для работы с файлами - C:\\jarvis_works и все что ты делаешь должно быть в ней.
 6) Если я прошу создать папку и такая уже есть, просто считай что создал ее.
 7) Для сложных расчетов и больших чисел используй {nexus.PythonExec.function.__name__}
-
 """
 
 JARVIS = Jarvis(sys_message)
@@ -26,6 +25,7 @@ arg_parser.add_argument(
 args = arg_parser.parse_args()
 
 nexus.RESTART_PATH = args.bat_path
+nexus.CURRENT_BOT = JARVIS
 
 
 def main():
