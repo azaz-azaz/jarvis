@@ -1,7 +1,10 @@
 import ast
 import json
 import os
+import pyautogui
 import requests
+import urllib3.exceptions
+
 import Sets
 import nexus
 import keys
@@ -15,9 +18,8 @@ def check_valid(ip_port: str):
     try:
         txt = requests.get(
             "https://api.openai.com/",
-            # proxies={"https": "65.109.152.88	8888".replace('	', ':')},
             proxies={"https": ip_port.replace('	', ':')},
-            timeout=4
+            timeout=4,
         ).text
         
         return "(){var b=a.getElement" not in txt
@@ -27,19 +29,28 @@ def check_valid(ip_port: str):
 
 def convert_to_python_syntax(raw_text: str) -> str:
     for pack in (
-        (' true', ' True'),
-        (' false', ' False'),
-        (' null', ' None'),
-        ('|\n', '\n'),
+            (' true', ' True'),
+            (' false', ' False'),
+            (' null', ' None'),
+            ('|\n', '\n'),
     ):
         raw_text = raw_text.replace(*pack)
     return raw_text
-    
 
-proxies = {"https": "65.109.152.88	8888".replace('	', ':')}
-while not check_valid(proxies["https"]):
-    print("p", end='')
-print()
+
+proxies = [
+    {"https": "65.109.152.88	8888".replace('	', ':')}
+]
+print(end="JARVIS ACTIVATING")
+while True:
+    for proxy in proxies:
+        if check_valid(proxy['https']):
+            break
+    else:
+        print(end='.')
+proxies = proxy
+print('!')
+pyautogui.alert("JARVIS INITIALISED & CONNECTED")
 url = 'https://api.openai.com/v1/chat/completions'
 headers = {
     "Content-Type": "application/json",
@@ -47,8 +58,8 @@ headers = {
 }
 tools = nexus.tools
 available_functions = nexus.available_tools
-generate_filename = lambda: (str(datetime.now()).replace(' ', '_').replace(':', '-') +
-                             ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(4)]))
+generate_filename = lambda: "jarvis-code-" + (str(datetime.now()).replace(' ', '_').replace(':', '-') +
+                                              ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(0)]))
 
 languages = {
     "cpp": "cpp",
@@ -88,22 +99,35 @@ class Bot:
         self.messages.append(message)
     
     @staticmethod
-    def _do_request(data: dict) -> dotdict:
-        print("sending...",)
+    def _do_request(data: dict, *, silent: bool = False) -> dotdict:
+        print("sending...", )
         pprint(data)
-        print("received", end=' ')
-        response = requests.request(
-            method="POST",
-            headers=headers,
-            url=url,
-            data=json.dumps(data),
-            proxies=proxies
-        )
-        pprint(response.json())
+        print(end='received... ')
+        while True:
+            try:
+                response = requests.request(
+                    method="POST",
+                    headers=headers,
+                    url=url,
+                    data=json.dumps(data),
+                    proxies=proxies
+                )
+                if response.status_code == 403:
+                    print("Got 403")
+                    raise ConnectionError("403 openai")
+                break
+            except OSError:
+                print(end='(o)')
+            except urllib3.exceptions.MaxRetryError:
+                print(end='(m)')
+            except requests.exceptions.ProxyError:
+                print(end='(p)')
+        if silent:
+            pprint(response.json())
         try:
             assert response.status_code == 200
         except AssertionError:
-            raise AssertionError("oai code ==", response.status_code)
+            raise AssertionError("Oai code == " + str(response.status_code))
         return dotdict(response.json())
     
     def get_response(

@@ -4,10 +4,9 @@ import sys
 import webbrowser
 import folium
 import pyautogui
-from keyboard import wait
-
 import Sets
 import colorama
+from keyboard import wait
 from datetime import datetime
 from typing import Callable, Literal, Any
 from dotdict import dotdict
@@ -172,12 +171,15 @@ def python_interpreter(kwargs) -> str:
 # noinspection PyUnresolvedReferences
 def self_tools(kwargs) -> str:
     lambda restart: print("RESTARTING"), subprocess.Popen(RESTART_PATH), wait()
-    lambda stop: print("JARVIS SYSTEM DEACTIVATED"), wait()
-    lambda clear_memory: print("MEMORY CLEARED"), CURRENT_BOT.set_empty_history()
+    lambda stop: print("STOPPING"), quit(0)
     tool_name = kwargs.get('tool_name')
     if tool_name is None:
-        raise ValueError(f"{self_tools.__name__}: tool_name is None or not given")
-    eval(tool_name + '()')
+        # raise ValueError(f"{self_tools.__name__}: tool_name is None or not given")
+        return f"{self_tools.__name__}: tool_name is None or not given"
+    try:
+        eval(tool_name + '()')
+    except NameError:
+        return f"Tool {tool_name} not found"
     return f"Successfully executed: {kwargs['tool_name']}"
 
 
@@ -262,7 +264,7 @@ SelfTools = UsableFunction(
         Prop(
             'tool',
             'string',
-            """Tool that you want to use, allowed values: restart, stop, clear_memory""",
+            """Tool that you want to use, allowed values: [restart, stop]""",
             True,
         )
     ],
