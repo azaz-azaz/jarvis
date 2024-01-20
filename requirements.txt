@@ -4,3 +4,4 @@ folium>=0.15.1
 keyboard>=0.13.5
 chardet>=5.2.0
 colorama>=0.4.6
+urllib3>=2.1.0

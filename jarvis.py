@@ -4,7 +4,6 @@ import os
 import pyautogui
 import requests
 import urllib3.exceptions
-
 import Sets
 import nexus
 import keys
@@ -12,6 +11,9 @@ from pprint import pprint
 from datetime import datetime
 from random import choice
 from dotdict import dotdict, superlist
+
+
+print("DEPENDENCIES INITIALISED")
 
 
 def check_valid(ip_port: str):
