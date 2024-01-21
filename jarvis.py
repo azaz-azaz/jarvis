@@ -12,7 +12,6 @@ from datetime import datetime
 from random import choice
 from dotdict import dotdict, superlist
 
-
 print("DEPENDENCIES INITIALISED")
 
 
@@ -20,7 +19,7 @@ def check_valid(ip_port: str):
     try:
         txt = requests.get(
             "https://api.openai.com/",
-            proxies={"https": ip_port.replace('	', ':')},
+            proxies={"https": ip_port},
             timeout=4,
         ).text
         
@@ -41,15 +40,20 @@ def convert_to_python_syntax(raw_text: str) -> str:
 
 
 proxies = [
-    {"https": "65.109.152.88	8888".replace('	', ':')}
+    {"https": "65.109.152.88:8888"},
+    {"https": "13.234.24.116:3128"},
 ]
 print(end="JARVIS ACTIVATING")
-while True:
+for _ in range(20):
     for proxy in proxies:
         if check_valid(proxy['https']):
+            print("connected at", proxy, end='')
             break
     else:
         print(end='.')
+else:
+    input("Cant connect to proxy")
+    raise ValueError("Cant connect to proxy")
 proxies = proxy
 print('!')
 pyautogui.alert("JARVIS INITIALISED & CONNECTED")
@@ -60,8 +64,9 @@ headers = {
 }
 tools = nexus.tools
 available_functions = nexus.available_tools
-generate_filename = lambda: "jarvis-code-" + (str(datetime.now()).replace(' ', '_').replace(':', '-') +
-                                              ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(0)]))
+generate_filename = lambda: ("jarvis-code-" +
+                             (str(datetime.now()).replace(' ', '_').replace(':', '-') +
+                              ''.join([choice('qwertyuiopasdfghjklzxcvbnm') for _ in range(0)])))
 
 languages = {
     "cpp": "cpp",
